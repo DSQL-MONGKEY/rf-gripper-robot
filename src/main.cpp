@@ -1,15 +1,33 @@
 #include <Arduino.h>
+#include <wire.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+#include <SPI.h>
 
-#define ENA 9
+#define ENA 10
 #define IN1 7
 #define IN2 8
 
-#define ENB 10
+#define ENB 11
 #define IN3 4
 #define IN4 5
 
+// NRF24L01
+#define CE_PIN 12
+#define CSN_PIN 13
+
+// Initiate Radio
+RF24 radio(CE_PIN, CSN_PIN);
+const byte address[6] = "00001";
+
 void setup() {
   Serial.begin(9600);
+  
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.startListening();
+
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
@@ -19,15 +37,45 @@ void setup() {
   pinMode(IN4, OUTPUT);
 }
 
+void loop() {
+  if(radio.available()) {
+    char text[32] = "";
+    radio.read(&text, sizeof(text));
+    
+    Serial.println("Data Diterima: " + String(text));
+  }
+  
+  
+  // Serial.println("Maju");
+  // maju();
+  // delay(2000);
+
+  // Serial.println("Mundur");
+  // mundur();
+  // delay(2000);
+
+  // Serial.println("Putar Kanan");
+  // putarKanan();
+  // delay(2000);
+
+  // Serial.println("Putar Kiri");
+  // putarKiri();
+  // delay(2000);
+}
+
+
+
 void maju() {
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
   analogWrite(ENA, 150);
 
+
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
   analogWrite(ENB, 150);
 }
+
 
 void mundur() {
   digitalWrite(IN1, LOW);
@@ -68,24 +116,3 @@ void putarKiri() {
   digitalWrite(IN4, LOW);
   analogWrite(ENB, 150);
 }
-
-
-void loop() {
-  Serial.println("Maju");
-  maju();
-  delay(2000);
-
-  Serial.println("Mundur");
-  mundur();
-  delay(2000);
-
-  Serial.println("Putar Kanan");
-  putarKanan();
-  delay(2000);
-
-  Serial.println("Putar Kiri");
-  putarKiri();
-  delay(2000);
-}
-
-
