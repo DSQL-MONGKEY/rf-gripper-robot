@@ -22,11 +22,11 @@ void setup() {
    radio.stopListening();
 
    if(!mpu.begin()) {
-      Serial.println("MPU6050 is undetected! ");
+      Serial.println("MPU6050 is not found!");
       while(1);
    }
 
-   Serial.println("MPU6050 succeded initialized! ");
+   Serial.println("MPU6050 success to initialize!");
 }
 
 void loop() {
