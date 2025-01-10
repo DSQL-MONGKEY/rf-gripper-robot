@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <RF24.h>
@@ -35,8 +36,8 @@ void loop() {
    float data[3] = {
       a.acceleration.x,
       a.acceleration.y,
-      a.acceleration.z,
-   }
+      a.acceleration.z
+   };
 
    bool success = radio.write(&data, sizeof(data));
 
@@ -46,8 +47,11 @@ void loop() {
       Serial.print(data[1]); Serial.print(", ");
       Serial.println(data[2]);
    } else {
+      Serial.print(data[0]); Serial.print(", ");
+      Serial.print(data[1]); Serial.print(", ");
+      Serial.println(data[2]);
       Serial.println("Data failed to send! ");
    }
 
-   delay(100);
+   delay(2000);
 }
