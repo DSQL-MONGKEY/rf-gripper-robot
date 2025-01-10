@@ -50,7 +50,7 @@ void loop() {
       Serial.print(data[0]); Serial.print(", ");
       Serial.print(data[1]); Serial.print(", ");
       Serial.println(data[2]);
-      Serial.println("Data failed to send! ");
+      Serial.println("Data failed to sent! ");
    }
 
    delay(2000);
