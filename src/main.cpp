@@ -3,6 +3,7 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <SPI.h>
+#include <Servo.h>
 
 #define ENA 10
 #define IN1 7
@@ -16,13 +17,27 @@
 #define CE_PIN 9
 #define CSN_PIN 10
 
+Servo gripperServo;
+#define SERVO_PIN 3
+#define OPEN_ANGLE 90
+#define CLOSE_ANGLE 0
+
+bool isRobotMode = true;
+
 // Initiate Radio
 RF24 radio(CE_PIN, CSN_PIN);
-const byte address[6] = "00001";
+const byte SLAVE_ADDRESS[5] = {'R', 'X', 'A', 'A', 'A'};
+
+
+// struct DataPackage {
+//    float gyroX;
+//    float gyroY;
+//    float gyroZ;
+// }
+// DataPackage data;
 
 void setup() {
    Serial.begin(9600);
-  
 
    radio.begin();
    
@@ -30,19 +45,38 @@ void setup() {
       Serial.println("======= NRF24L01 is unconnected =======");
       Serial.println("[ERROR] NRF24L01 not detected. Please check the wiring!");
       while(1);
-   } else {
-      Serial.println("======= NRF24L01 is connected =======");
-      Serial.println("[SUCCESS] NRF24L01 detected and initialized.");
-      radio.openReadingPipe(0, address);
-      radio.setPALevel(RF24_PA_LOW);
-      
-      Serial.println("Checking SPI device...");
-      byte response = SPI.transfer(0xFF);
-      Serial.print("Response SPI: ");
-      Serial.println(response, HEX);
-      
-      radio.startListening();
-   } 
+   }
+
+   Serial.println("======= NRF24L01 is connected =======");
+   Serial.println("[SUCCESS] NRF24L01 detected and initialized.");
+   radio.openReadingPipe(0, SLAVE_ADDRESS);
+   radio.setPALevel(RF24_PA_LOW);
+
+   Serial.println("Checking SPI device...");
+   byte response = SPI.transfer(0xFF);
+   Serial.print("Response SPI: ");
+   Serial.println(response, HEX);
+   
+   radio.startListening();
+   radio.enableAckPayload();
+
+   if(radio.available()) {
+      char receivedText[32] = {0};
+      radio.read(&receivedText, sizeof(receivedText));
+
+      Serial.print("Message received: ");
+      Serial.println(receivedText);
+
+      if(strcmp(receivedText, "PING") == 0) {
+         char response[] = "PONG";
+         radio.writeAckPayload(0, &response, sizeof(response));
+         Serial.println("Response sent: PONG");
+      }
+   };
+
+   gripperServo.attach(SERVO_PIN);
+   gripperServo.write(OPEN_ANGLE);
+   Serial.println("Servo Initialized");
 
    pinMode(ENA, OUTPUT);
    pinMode(IN1, OUTPUT);
@@ -51,7 +85,7 @@ void setup() {
    pinMode(ENB, OUTPUT);
    pinMode(IN3, OUTPUT);
    pinMode(IN4, OUTPUT);
-}
+};
 
 void maju() {
    digitalWrite(IN1, HIGH);
@@ -128,7 +162,9 @@ void loop() {
       } else {
          stop();
       };
+      delay(500);
    };
+   delay(2000);
 }
 
 
