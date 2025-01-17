@@ -135,11 +135,11 @@ void carMode() {
    Serial.print("Kondisi: ");
    if (data[1] > 3) {
       //forward
-      maju();
+      mundur();
       Serial.print("MAJU \t");
    } else if (data[1] < -3) {
       //backward
-      mundur();
+      maju();
       Serial.print("MUNDUR \t");
    } else if (data[2] > 3) {
       //left
